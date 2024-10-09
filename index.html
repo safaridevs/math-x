@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Multiplication Practice</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Fun Multiplication Practice</h1>
+        <p id="timer"></p>
+        <div id="level-buttons">
+            <button onclick="setLevel(1)">Level 1 (Easy)</button>
+            <button onclick="setLevel(2)">Level 2 (Medium)</button>
+            <button onclick="setLevel(3)">Level 3 (Hard)</button>
+        </div>
+        <div id="question"></div>
+        <input type="number" id="answer" placeholder="Enter your answer">
+        <button onclick="checkAnswer()">Submit</button>
+        <p id="result"></p>
+        <p id="score">Score: 0</p>
+        <button onclick="nextQuestion()">Next Question</button>
+
+        <!-- Leaderboard -->
+        <h2>Leaderboard</h2>
+        <ul id="leaderboard"></ul>
+    </div>
+
+    <audio id="correct-sound" src="correct.mp3"></audio>
+    <audio id="wrong-sound" src="wrong.mp3"></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
