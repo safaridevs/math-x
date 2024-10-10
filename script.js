@@ -1,21 +1,29 @@
 let num1, num2;
 let score = 0;
-let timeLeft = 60;
+let timeLeft = 120;  // Set the timer to 2 minutes
 let maxNumber = 10;
 let leaderboard = [];
-let usedQuestions = [];
-let levelActive = false;
+let usedPairs = [];  // Array to store used number pairs
+let gameActive = false;  // Track whether a game is active
+let timerInterval;
+let nextQuestionTimeout;
 
-// Generate multiplication question without repeating the same numbers in the same order
+// Generate unique multiplication question
 function generateQuestion() {
+    let newPair;
     do {
         num1 = Math.floor(Math.random() * maxNumber) + 1;
         num2 = Math.floor(Math.random() * maxNumber) + 1;
-    } while (usedQuestions.includes(`${num1}x${num2}`));
+        newPair = [num1, num2];
+    } while (isPairUsed(newPair));
 
-    usedQuestions.push(`${num1}x${num2}`); // Track used questions
-
+    usedPairs.push(newPair);  // Store the generated pair
     document.getElementById('question').innerHTML = `What is ${num1} x ${num2}?`;
+}
+
+// Check if the generated pair has been used before
+function isPairUsed(pair) {
+    return usedPairs.some(usedPair => usedPair[0] === pair[0] && usedPair[1] === pair[1]);
 }
 
 // Check the student's answer
@@ -36,6 +44,9 @@ function checkAnswer() {
 
     document.getElementById('score').innerHTML = `Score: ${score}`;
     document.getElementById('answer').value = '';  // Clear the input
+
+    // Automatically move to the next question after 3 seconds
+    nextQuestionTimeout = setTimeout(nextQuestion, 2000);
 }
 
 // Move to the next question
@@ -45,16 +56,17 @@ function nextQuestion() {
     generateQuestion();
 }
 
-// Start a timer and disable level buttons during gameplay
+// Start a timer
 function startTimer() {
-    disableLevelButtons(true);
-    const timerInterval = setInterval(function() {
+    timerInterval = setInterval(function() {
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
+            gameActive = false;
+            enableLevelButtons();
             alert('Time is up! Your final score is ' + score);
             let playerName = prompt('Enter your name to save your score:');
             updateLeaderboard(playerName, score);
-            resetGame();  // Reset fields except leaderboard
+            resetFields();
         } else {
             document.getElementById('timer').innerHTML = `Time left: ${timeLeft} seconds`;
         }
@@ -62,28 +74,36 @@ function startTimer() {
     }, 1000);
 }
 
-// Set level based on button clicked and start the game
+// Set level and disable buttons while level is active
 function setLevel(level) {
-    if (levelActive) return; // Prevent switching levels during an active game
-    levelActive = true;
+    if (!gameActive) {
+        gameActive = true;
+        disableLevelButtons();
 
-    if (level === 1) {
-        maxNumber = 5;
-    } else if (level === 2) {
-        maxNumber = 10;
-    } else {
-        maxNumber = 20;
+        if (level === 1) {
+            maxNumber = 5;
+        } else if (level === 2) {
+            maxNumber = 10;
+        } else {
+            maxNumber = 20;
+        }
+        resetGame();
+        startTimer();
     }
-
-    resetGame();
-    startTimer();
 }
 
-// Disable or enable level buttons
-function disableLevelButtons(disable) {
-    document.getElementById('level1').disabled = disable;
-    document.getElementById('level2').disabled = disable;
-    document.getElementById('level3').disabled = disable;
+// Disable level buttons
+function disableLevelButtons() {
+    document.getElementById('level1').disabled = true;
+    document.getElementById('level2').disabled = true;
+    document.getElementById('level3').disabled = true;
+}
+
+// Enable level buttons
+function enableLevelButtons() {
+    document.getElementById('level1').disabled = false;
+    document.getElementById('level2').disabled = false;
+    document.getElementById('level3').disabled = false;
 }
 
 // Play sound based on answer correctness
@@ -105,17 +125,26 @@ function displayLeaderboard() {
     document.getElementById('leaderboard').innerHTML = `<ul>${leaderboardHTML}</ul>`;
 }
 
-// Reset the game for new rounds, but keep the leaderboard intact
+// Reset the fields after time runs out (except leaderboard)
+function resetFields() {
+    score = 0;
+    timeLeft = 120;  // Reset time to 2 minutes
+    usedPairs = [];  // Clear used number pairs
+    document.getElementById('score').innerHTML = `Score: 0`;
+    document.getElementById('timer').innerHTML = '';
+    document.getElementById('question').innerHTML = '';
+    document.getElementById('answer').value = '';
+    document.getElementById('result').innerHTML = '';
+    clearTimeout(nextQuestionTimeout);  // Clear any pending next question timeout
+}
+
+// Reset the game for new rounds
 function resetGame() {
     score = 0;
-    timeLeft = 60;
-    usedQuestions = [];  // Clear used questions to allow fresh set
-    levelActive = false;
+    timeLeft = 120;  // Set to 2 minutes
+    usedPairs = [];  // Reset unique question pairs
     document.getElementById('score').innerHTML = `Score: 0`;
     document.getElementById('timer').innerHTML = `Time left: ${timeLeft} seconds`;
-    document.getElementById('result').innerHTML = '';
-    document.getElementById('answer').value = '';
-    disableLevelButtons(false); // Enable level buttons after game ends
     nextQuestion();
 }
 
